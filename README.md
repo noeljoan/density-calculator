@@ -150,3 +150,5 @@ Weitere Metalle lassen sich in der Liste `MAT` im Quelltext ergänzen (Name, Min
 ---
 
 *Gebaut für alle, die wissen wollen, was wirklich in ihrem Metallteil steckt.*
+
+*© 2026 Noel Joan. Alle Rechte vorbehalten.*

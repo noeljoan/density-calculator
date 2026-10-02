@@ -139,3 +139,5 @@ Se pueden añadir más metales en la lista `MAT` del código fuente (nombres, m�
 ---
 
 *Hecho para quienes quieren saber qué lleva realmente su pieza de metal.*
+
+*© 2026 Noel Joan. Todos los derechos reservados.*

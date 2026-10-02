@@ -150,3 +150,5 @@ D'autres métaux peuvent être ajoutés dans la liste `MAT` du code source (nom,
 ---
 
 *Conçu pour tous ceux qui veulent savoir ce que contient vraiment leur pièce de métal.*
+
+*© 2026 Noel Joan. Tous droits réservés.*

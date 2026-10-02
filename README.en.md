@@ -139,3 +139,5 @@ More metals can be added to the `MAT` list in the source code (names, minimum, m
 ---
 
 *Built for everyone who wants to know what is really inside their piece of metal.*
+
+*© 2026 Noel Joan. All rights reserved.*
