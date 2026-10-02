@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><title>Density · Dichte · Densité · Densidad</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#667085;--ac:#2563eb;--bd:#d9dde3;--ok:#16a34a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2127;--tx:#e8eaed;--mut:#9aa3af;--ac:#60a5fa;--bd:#343a43;--ok:#4ade80}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2127;--tx:#e8eaed;--mut:#9aa3af;--ac:#60a5fa;--bd:#343a43;--ok:#4ade80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font-size:1.3rem;margin:.3rem 0 1rem}
+.lang{display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden;flex-shrink:0}
+.lang button{border:0;background:var(--card);color:var(--tx);padding:7px 12px;font-size:.9rem;cursor:pointer}
+.lang button.on{background:var(--ac);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:.85rem;color:var(--mut);margin-top:10px}
+input,select{width:100%;box-sizing:border-box;font-size:1rem;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{font-size:2rem;font-weight:700}
+.mut{color:var(--mut);font-size:.85rem}
+.chip{display:inline-block;padding:4px 10px;border-radius:99px;border:1px solid var(--ok);color:var(--ok);margin:4px 6px 0 0;font-weight:600}
+.scale{position:relative;height:60px;margin-top:14px;border-bottom:2px solid var(--bd)}
+.seg{position:absolute;top:6px;height:14px;background:var(--ac);opacity:.35;border-radius:3px}
+.lbl{position:absolute;font-size:.65rem;color:var(--mut);transform:translateX(-50%);white-space:nowrap}
+.mark{position:absolute;top:0;width:3px;height:26px;background:var(--ok)}
+.warn{color:#d97706;font-size:.85rem;margin-top:8px}
+</style></head><body><main>
+<div class="top"><h1 id="t_title"></h1>
+<div class="lang"><button id="b_de">DE</button><button id="b_fr">FR</button><button id="b_en">EN</button><button id="b_es">ES</button></div></div>
+<div class="card">
+<div class="row">
+<div><label for="m" id="l_m"></label><input id="m" type="number" step="any" value="100"></div>
+<div><label for="dm" id="l_dm"></label><input id="dm" type="number" step="any" value="14.1"></div>
+<div><label for="T" id="l_T"></label><input id="T" type="number" step="any" value="20"></div>
+<div><label for="res" id="l_res"></label><input id="res" type="number" step="any" value="0.1"></div>
+</div>
+<label for="k" id="l_k"></label>
+<select id="k"><option value="1">k = 1 (≈68 %)</option><option value="2" selected>k = 2 (≈95 %)</option><option value="3">k = 3 (≈99,7 %)</option></select>
+</div>
+<div class="card" id="out"></div>
+<div class="card"><b id="t_known"></b><div class="mut" id="t_bar"></div><div class="scale" id="scale"></div></div>
+<p class="mut" id="t_note"></p>
+</main>
+<script>
+const TX={
+de:{title:"Dichtebestimmung per Auftrieb",m:"Masse trocken m (g)",dm:"Waagenanzeige Δm (g)",T:"Wassertemperatur (°C)",res:"Waagenauflösung (g)",k:"Sicherheitsfaktor Unsicherheit (k)",known:"Bekannte Dichten",bar:"Balken = Bereich (Legierungen), grün = Messwert",note:"Δm = Waagenanzeige, wenn die Probe frei am Faden hängt (Waage vorher mit Wasserbehälter tariert). Gültig für Proben, die sinken.",invalid:"Bitte gültige Werte eingeben (m > 0, Δm > 0).",rw:"Wasserdichte bei",vol:"Volumen",likely:"Wahrscheinliches Material:",none:"kein Treffer in der Tabelle",small:"Δm ist klein – Ergebnis wenig genau. Größere Probe verwenden.",float:"Dichte < 1 g/cm³: Probe schwimmt, Methode nicht anwendbar."},
+fr:{title:"Mesure de densité par poussée d'Archimède",m:"Masse sèche m (g)",dm:"Valeur de la balance Δm (g)",T:"Température de l'eau (°C)",res:"Résolution de la balance (g)",k:"Facteur de sécurité de l'incertitude (k)",known:"Densités connues",bar:"Barre = plage (alliages), vert = valeur mesurée",note:"Δm = valeur affichée quand l'échantillon est suspendu librement au fil (balance tarée avec le récipient d'eau). Valable pour les échantillons qui coulent.",invalid:"Veuillez saisir des valeurs valides (m > 0, Δm > 0).",rw:"Masse volumique de l'eau à",vol:"Volume",likely:"Matériau probable :",none:"aucune correspondance dans le tableau",small:"Δm est faible – résultat peu précis. Utiliser un échantillon plus grand.",float:"Densité < 1 g/cm³ : l'échantillon flotte, méthode inapplicable."},
+en:{title:"Density measurement by buoyancy",m:"Dry mass m (g)",dm:"Scale reading Δm (g)",T:"Water temperature (°C)",res:"Scale resolution (g)",k:"Uncertainty safety factor (k)",known:"Known densities",bar:"Bar = range (alloys), green = measured value",note:"Δm = scale reading while the sample hangs freely on a thread (scale tared with the water container). Valid for samples that sink.",invalid:"Please enter valid values (m > 0, Δm > 0).",rw:"Water density at",vol:"Volume",likely:"Likely material:",none:"no match in the table",small:"Δm is small – result is imprecise. Use a larger sample.",float:"Density < 1 g/cm³: sample floats, method not applicable."},
+es:{title:"Medición de densidad por empuje",m:"Masa seca m (g)",dm:"Lectura de la balanza Δm (g)",T:"Temperatura del agua (°C)",res:"Resolución de la balanza (g)",k:"Factor de seguridad de la incertidumbre (k)",known:"Densidades conocidas",bar:"Barra = rango (aleaciones), verde = valor medido",note:"Δm = lectura de la balanza con la muestra colgada libremente de un hilo (balanza tarada con el recipiente de agua). Válido para muestras que se hunden.",invalid:"Introduzca valores válidos (m > 0, Δm > 0).",rw:"Densidad del agua a",vol:"Volumen",likely:"Material probable:",none:"sin coincidencia en la tabla",small:"Δm es pequeño: resultado poco preciso. Use una muestra mayor.",float:"Densidad < 1 g/cm³: la muestra flota, método no aplicable."}};
+const MAT=[[["Magnesium","Magnésium","Magnesium","Magnesio"],1.70,1.80],[["Aluminium","Aluminium","Aluminium","Aluminio"],2.60,2.85],[["Titan","Titane","Titanium","Titanio"],4.40,4.51],[["Zink","Zinc","Zinc","Zinc"],6.60,7.14],[["Zinn","Étain","Tin","Estaño"],7.28,7.31],[["Stahl/Eisen","Acier/Fer","Steel/Iron","Acero/Hierro"],7.70,7.90],[["Nordic Gold","Or nordique","Nordic Gold","Oro nórdico"],7.80,8.00],[["Messing","Laiton","Brass","Latón"],8.40,8.70],[["Nickel","Nickel","Nickel","Níquel"],8.80,8.91],[["Kupfer","Cuivre","Copper","Cobre"],8.90,8.96],[["Blei","Plomb","Lead","Plomo"],11.30,11.36]];
+const LANGS=["de","fr","en","es"];
+const $=id=>document.getElementById(id);
+let L="de";
+try{const s=localStorage.getItem("lang");if(LANGS.includes(s))L=s;else{const n=(navigator.language||"").slice(0,2);if(LANGS.includes(n))L=n;}}catch(e){}
+const f=(v,d)=>L=="en"?v.toFixed(d):v.toFixed(d).replace(".",",");
+function rhoW(T){return (999.83952+16.945176*T-7.9870401e-3*T**2-46.170461e-6*T**3+105.56302e-9*T**4-280.54253e-12*T**5)/(1+16.87985e-3*T)/1000;}
+function setLang(l){
+ L=l;try{localStorage.setItem("lang",l);}catch(e){}
+ document.documentElement.lang=l;const t=TX[l];
+ $("t_title").textContent=t.title;$("l_m").textContent=t.m;$("l_dm").textContent=t.dm;$("l_T").textContent=t.T;$("l_res").textContent=t.res;$("l_k").textContent=t.k;$("t_known").textContent=t.known;$("t_bar").textContent=t.bar;$("t_note").textContent=t.note;
+ LANGS.forEach(x=>$("b_"+x).className=x==l?"on":"");
+ calc();
+}
+function calc(){
+ const t=TX[L],m=+$("m").value,dm=+$("dm").value,T=+$("T").value,r=+$("res").value,k=+$("k").value,ni=LANGS.indexOf(L);
+ if(!(m>0)||!(dm>0)){$("out").innerHTML='<span class="mut">'+t.invalid+'</span>';return;}
+ const rw=rhoW(T),rho=m/dm*rw,rel=Math.sqrt((r/m)**2+(r/dm)**2),u=rho*rel*k,lo=rho-u,hi=rho+u;
+ const hits=MAT.filter(x=>x[2]>=lo&&x[1]<=hi).map(x=>x[0][ni]);
+ let h=`<div class="mut">${t.rw} ${T} °C: ${f(rw,4)} g/cm³ · ${t.vol}: ${f(dm/rw,2)} cm³</div>
+ <div class="big">${f(rho,2)} g/cm³</div>
+ <div>± ${f(u,2)} g/cm³ <span class="mut">(${f(rel*k*100,1)} %, k=${k})</span></div>
+ <div style="margin-top:10px"><b>${t.likely}</b><br>`;
+ h+=hits.length?hits.map(n=>`<span class="chip">${n}</span>`).join(""):'<span class="mut">'+t.none+'</span>';
+ h+="</div>";
+ if(dm<10)h+='<div class="warn">'+t.small+'</div>';
+ if(rho<1)h+='<div class="warn">'+t.float+'</div>';
+ $("out").innerHTML=h;
+ const max=12.5,p=v=>Math.min(v,max)/max*100;
+ let s=MAT.map((x,i)=>`<div class="seg" style="left:${p(x[1])}%;width:${Math.max(p(x[2])-p(x[1]),0.8)}%"></div><div class="lbl" style="left:${p((x[1]+x[2])/2)}%;top:${22+(i%2)*12}px">${x[0][ni]}</div>`).join("");
+ s+=`<div class="mark" style="left:${p(rho)}%"></div>`;
+ $("scale").innerHTML=s;
+}
+document.querySelectorAll("input,select").forEach(e=>e.addEventListener("input",()=>calc()));
+LANGS.forEach(x=>$("b_"+x).onclick=()=>setLang(x));
+setLang(L);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
